@@ -10,23 +10,41 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  function handleLogin(event) {
-    // TODO: impedir o comportamento padrão do formulário.
-    event.preventDefault(); // Preparação mínima: a página não recarrega durante a aula.
-    // TODO: limpar mensagem de erro anterior.
-    // TODO: validar se email e password foram preenchidos.
-    // TODO: ativar loading.
-    // TODO: chamar POST /auth/login usando api.post.
-    // TODO: enviar email e password no body.
-    // TODO: pegar o token retornado pelo backend.
-    // TODO: salvar o token usando saveToken.
-    // TODO: redirecionar para /protegida usando useNavigate.
-    // TODO: mostrar mensagem de erro se o login falhar.
-    // TODO: desativar loading no final.
-    // O backend retorna um token JWT. O frontend precisa guardá-lo para as próximas requisições.
-    // Dica: use try/catch/finally para separar sucesso, erro e loading.
+ async function handleLogin(event) {
+  event.preventDefault();
+
+  setError("");
+
+  if (!email || !password) {
+    setError("Preencha email e senha.");
+    return;
   }
 
+  setLoading(true);
+
+  try {
+    const response = await api.post("/auth/login", {
+      email,
+      password,
+    });
+
+    const token = response.data.token;
+
+    saveToken(token);
+
+    navigate("/protegida");
+  } catch (error) {
+    console.error("Erro no login:", error);
+
+    const mensagem =
+      error.response?.data?.message ||
+      "Não foi possível realizar o login.";
+
+    setError(mensagem);
+  } finally {
+    setLoading(false);
+  }
+}
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-8">
       <section className="w-full max-w-md rounded-xl bg-white p-6 shadow-md sm:p-8">
